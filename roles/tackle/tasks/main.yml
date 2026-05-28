@@ -581,9 +581,9 @@
             {{ rhbk_url }}/realms/{{ keycloak_sso_realm }}
           {% elif standalone_keycloak_svc.resources | length > 0 %}
             http://{{ standalone_keycloak_svc.resources[0].metadata.name }}:8080/realms/{{ keycloak_sso_realm }}
-          {% elif rhsso_keycloak_cr is defined and rhsso_keycloak_cr.resources | length > 0 %}
+          {% elif rhsso_keycloak_cr is defined and rhsso_keycloak_cr.resources | default([]) | length > 0 %}
             http://keycloak.{{ app_namespace }}.svc:8080/realms/{{ keycloak_sso_realm }}
-          {% elif rhbk_keycloak_cr is defined and rhbk_keycloak_cr.resources | length > 0 %}
+          {% elif rhbk_keycloak_cr is defined and rhbk_keycloak_cr.resources | default([]) | length > 0 %}
             https://{{ app_name }}-keycloak-service.{{ app_namespace }}.svc:8443/realms/{{ keycloak_sso_realm }}
           {% else %}
 
@@ -756,6 +756,7 @@
   when:
     - not openshift_cluster|bool
     - ui_ingress_info.resources | length > 0
+    - ui_ingress_info.resources[0].spec.rules[0].host is defined
 
 - name: "Set Hub OIDC issuer URL from app base URL"
   set_fact:
@@ -763,6 +764,7 @@
   when:
     - not openshift_cluster|bool
     - ui_ingress_info.resources | length > 0
+    - ui_ingress_info.resources[0].spec.rules[0].host is defined
 
 - name: "Create IdentityProvider CR for federated authentication"
   k8s:
